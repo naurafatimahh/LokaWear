@@ -64,6 +64,16 @@ const createNotification = (req, res) => {
         });
     }
 
+    if (
+        !Number.isInteger(Number(user_id)) ||
+        (product_id != null && !Number.isInteger(Number(product_id))) ||
+        typeof title !== "string" || title.length > 150 ||
+        typeof message !== "string" || message.length > 1000 ||
+        typeof type !== "string" || type.length > 50
+    ) {
+        return res.status(400).json({ message: "Data notification tidak valid" });
+    }
+
     notificationModel.createNotification(
         user_id,
         product_id || null,

@@ -9,6 +9,6 @@ router.get("/", authMiddleware, notificationController.getNotifications);
 
 router.patch("/:id/read", authMiddleware, notificationController.markNotificationAsRead);
 
-router.post("/", authMiddleware, roleMiddleware("brand", "admin"), notificationController.createNotification);
+router.post("/", authMiddleware, roleMiddleware("admin"), notificationController.createNotification);
 
 module.exports = router;
