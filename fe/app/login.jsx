@@ -1,6 +1,7 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import {
   ActivityIndicator,
+  Animated,
   Alert,
   KeyboardAvoidingView,
   Platform,
@@ -27,7 +28,13 @@ export default function Login() {
   const s = width / DESIGN_WIDTH
   const router = useRouter()
 
-  const [mode, setMode] = useState('signin')
+  const [mode, setMode] = useState('signup')
+  const [tabsWidth, setTabsWidth] = useState(0)
+  const slide = useRef(new Animated.Value(1)).current // 0 = Sign In, 1 = Sign Up
+
+  useEffect(() => {
+    Animated.timing(slide, { toValue: mode === 'signup' ? 1 : 0, duration: 220, useNativeDriver: true }).start()
+  }, [mode, slide])
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -77,7 +84,7 @@ export default function Login() {
   const tab = (key, label) => (
     <Pressable
       onPress={() => setMode(key)}
-      style={[styles.tab, { borderRadius: 7 * s }, mode === key && styles.tabActive]}
+      style={styles.tab}
     >
       <Text style={[mode === key ? styles.tabTextActive : styles.tabText, { fontSize: 8 * s }]}>{label}</Text>
     </Pressable>
@@ -95,7 +102,22 @@ export default function Login() {
           Sign in or create an account to see local brand pre-orders
         </Text>
 
-        <View style={[styles.tabs, { height: 26 * s, borderRadius: 7 * s, padding: 3 * s, marginTop: 14 * s }]}>
+        <View style={[styles.tabs, { height: 26 * s, borderRadius: 7 * s, padding: 3 * s, marginTop: 14 * s }]}
+          onLayout={(e) => setTabsWidth(e.nativeEvent.layout.width)}
+        >
+          {/* Pill putih yang bergeser di bawah teks tab */}
+          <Animated.View
+            style={{
+              position: 'absolute',
+              top: 3 * s,
+              bottom: 3 * s,
+              left: 3 * s,
+              width: (tabsWidth - 6 * s) / 2,
+              borderRadius: 7 * s,
+              backgroundColor: '#fff',
+              transform: [{ translateX: slide.interpolate({ inputRange: [0, 1], outputRange: [0, (tabsWidth - 6 * s) / 2] }) }],
+            }}
+          />
           {tab('signin', 'Sign In')}
           {tab('signup', 'Sign Up')}
         </View>
@@ -142,7 +164,6 @@ const styles = StyleSheet.create({
   subtitle: { color: 'rgba(0,0,0,0.6)', textAlign: 'center' },
   tabs: { flexDirection: 'row', backgroundColor: 'rgba(194,65,12,0.17)' },
   tab: { flex: 1, alignItems: 'center', justifyContent: 'center' },
-  tabActive: { backgroundColor: '#fff' },
   tabText: { fontWeight: '300', color: 'rgba(0,0,0,0.39)' },
   tabTextActive: { fontWeight: '600', color: '#000' },
   label: { color: '#000', fontWeight: '500' },
